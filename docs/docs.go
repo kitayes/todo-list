@@ -44,31 +44,31 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.getAllListsResponse"
+                            "$ref": "#/definitions/delivery.getAllListsResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     },
                     "404": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     },
                     "default": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     }
                 }
@@ -112,25 +112,25 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     },
                     "404": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     },
                     "default": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     }
                 }
@@ -157,7 +157,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.signInInput"
+                            "$ref": "#/definitions/delivery.signInInput"
                         }
                     }
                 ],
@@ -171,25 +171,25 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     },
                     "404": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     },
                     "default": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     }
                 }
@@ -230,25 +230,25 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     },
                     "404": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     },
                     "default": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/handler.errorResponse"
+                            "$ref": "#/definitions/delivery.errorResponse"
                         }
                     }
                 }
@@ -256,7 +256,7 @@ var doc = `{
         }
     },
     "definitions": {
-        "handler.errorResponse": {
+        "delivery.errorResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -264,7 +264,7 @@ var doc = `{
                 }
             }
         },
-        "handler.getAllListsResponse": {
+        "delivery.getAllListsResponse": {
             "type": "object",
             "properties": {
                 "data": {
@@ -275,7 +275,7 @@ var doc = `{
                 }
             }
         },
-        "handler.signInInput": {
+        "delivery.signInInput": {
             "type": "object",
             "required": [
                 "password",

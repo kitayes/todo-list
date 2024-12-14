@@ -1,4 +1,4 @@
-package handler
+package delivery
 
 import (
 	"errors"
@@ -85,7 +85,7 @@ func TestHandler_userIdentity(t *testing.T) {
 			test.mockBehavior(repo, test.token)
 
 			services := &service.Service{Authorization: repo}
-			handler := Handler{services}
+			handler := NewHandler(services)
 
 			// Init Endpoint
 			r := gin.New()

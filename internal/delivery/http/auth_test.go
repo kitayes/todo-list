@@ -1,4 +1,4 @@
-package handler
+package delivery
 
 import (
 	"bytes"
@@ -73,7 +73,7 @@ func TestHandler_signUp(t *testing.T) {
 			test.mockBehavior(repo, test.inputUser)
 
 			services := &service.Service{Authorization: repo}
-			handler := Handler{services}
+			handler := NewHandler(services)
 
 			// Init Endpoint
 			r := gin.New()

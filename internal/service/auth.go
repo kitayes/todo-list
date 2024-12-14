@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/zhashkevych/todo-app"
-	"github.com/zhashkevych/todo-app/pkg/repository"
 	"time"
+	"todo/internal/models"
+	"todo/internal/repository"
 )
 
 const (
@@ -29,7 +29,7 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 	return &AuthService{repo: repo}
 }
 
-func (s *AuthService) CreateUser(user todo.User) (int, error) {
+func (s *AuthService) CreateUser(user models.User) (int, error) {
 	user.Password = generatePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }

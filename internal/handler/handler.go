@@ -5,8 +5,8 @@ import (
 	_ "github.com/swaggo/files"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "github.com/zhashkevych/todo-app/docs"
-	"github.com/zhashkevych/todo-app/pkg/service"
+	_ "todo/docs"
+	"todo/internal/service"
 )
 
 type Handler struct {

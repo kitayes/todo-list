@@ -6,21 +6,21 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
-	"github.com/zhashkevych/todo-app"
-	"github.com/zhashkevych/todo-app/pkg/service"
-	service_mocks "github.com/zhashkevych/todo-app/pkg/service/mocks"
 	"net/http/httptest"
 	"testing"
+	"todo/internal/models"
+	"todo/internal/service"
+	service_mocks "todo/internal/service/mocks"
 )
 
 func TestHandler_signUp(t *testing.T) {
 	// Init Test Table
-	type mockBehavior func(r *service_mocks.MockAuthorization, user todo.User)
+	type mockBehavior func(r *service_mocks.MockAuthorization, user models.User)
 
 	tests := []struct {
 		name                 string
 		inputBody            string
-		inputUser            todo.User
+		inputUser            models.User
 		mockBehavior         mockBehavior
 		expectedStatusCode   int
 		expectedResponseBody string
@@ -28,12 +28,12 @@ func TestHandler_signUp(t *testing.T) {
 		{
 			name:      "Ok",
 			inputBody: `{"username": "username", "name": "Test Name", "password": "qwerty"}`,
-			inputUser: todo.User{
+			inputUser: models.User{
 				Username: "username",
 				Name:     "Test Name",
 				Password: "qwerty",
 			},
-			mockBehavior: func(r *service_mocks.MockAuthorization, user todo.User) {
+			mockBehavior: func(r *service_mocks.MockAuthorization, user models.User) {
 				r.EXPECT().CreateUser(user).Return(1, nil)
 			},
 			expectedStatusCode:   200,
@@ -42,20 +42,20 @@ func TestHandler_signUp(t *testing.T) {
 		{
 			name:                 "Wrong Input",
 			inputBody:            `{"username": "username"}`,
-			inputUser:            todo.User{},
-			mockBehavior:         func(r *service_mocks.MockAuthorization, user todo.User) {},
+			inputUser:            models.User{},
+			mockBehavior:         func(r *service_mocks.MockAuthorization, user models.User) {},
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"message":"invalid input body"}`,
 		},
 		{
 			name:      "Service Error",
 			inputBody: `{"username": "username", "name": "Test Name", "password": "qwerty"}`,
-			inputUser: todo.User{
+			inputUser: models.User{
 				Username: "username",
 				Name:     "Test Name",
 				Password: "qwerty",
 			},
-			mockBehavior: func(r *service_mocks.MockAuthorization, user todo.User) {
+			mockBehavior: func(r *service_mocks.MockAuthorization, user models.User) {
 				r.EXPECT().CreateUser(user).Return(0, errors.New("something went wrong"))
 			},
 			expectedStatusCode:   500,

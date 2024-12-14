@@ -3,8 +3,8 @@ package repository
 import (
 	"github.com/stretchr/testify/assert"
 	sqlmock "github.com/zhashkevych/go-sqlxmock"
-	"github.com/zhashkevych/todo-app"
 	"testing"
+	"todo/internal/models"
 )
 
 func TestAuthPostgres_CreateUser(t *testing.T) {
@@ -19,7 +19,7 @@ func TestAuthPostgres_CreateUser(t *testing.T) {
 	tests := []struct {
 		name    string
 		mock    func()
-		input   todo.User
+		input   models.User
 		want    int
 		wantErr bool
 	}{
@@ -30,7 +30,7 @@ func TestAuthPostgres_CreateUser(t *testing.T) {
 				mock.ExpectQuery("INSERT INTO users").
 					WithArgs("Test", "test", "password").WillReturnRows(rows)
 			},
-			input: todo.User{
+			input: models.User{
 				Name:     "Test",
 				Username: "test",
 				Password: "password",
@@ -44,7 +44,7 @@ func TestAuthPostgres_CreateUser(t *testing.T) {
 				mock.ExpectQuery("INSERT INTO users").
 					WithArgs("Test", "test", "").WillReturnRows(rows)
 			},
-			input: todo.User{
+			input: models.User{
 				Name:     "Test",
 				Username: "test",
 				Password: "",
@@ -87,7 +87,7 @@ func TestAuthPostgres_GetUser(t *testing.T) {
 		name    string
 		mock    func()
 		input   args
-		want    todo.User
+		want    models.User
 		wantErr bool
 	}{
 		{
@@ -99,7 +99,7 @@ func TestAuthPostgres_GetUser(t *testing.T) {
 					WithArgs("test", "password").WillReturnRows(rows)
 			},
 			input: args{"test", "password"},
-			want: todo.User{
+			want: models.User{
 				Id:       1,
 				Name:     "Test",
 				Username: "test",

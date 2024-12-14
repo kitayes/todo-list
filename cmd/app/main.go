@@ -15,6 +15,18 @@ import (
 	"todo/internal/service"
 )
 
+// @title           TODO list
+// @version         1.0
+// @description     Пет проект, заметки.
+// @termsOfService  http://swagger.io/terms/
+
+// @host localhost:8000
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 

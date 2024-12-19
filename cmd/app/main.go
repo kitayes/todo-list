@@ -18,10 +18,11 @@ import (
 )
 
 // TODO: дописать сваггер на все эндпоинты
+// TODO: почитать про миграции, добавить в pkg реализацию обновления миграций
 type Config struct {
 	Repo   repository.Config `envPrefix:"REPO_"`
-	Http   delivery.Config   `envPrefix:"HTTP_"`
 	logger logger.Config     `envPrefix:"LOGGER_"`
+	Http   delivery.Config   `envPrefix:"HTTP_"`
 }
 
 // @title           TODO list
@@ -48,7 +49,9 @@ func main() {
 		slog.Error("error initializing configs: %s", err.Error())
 		return
 	}
+
 	log := logger.NewLogger(&cfg.logger)
+
 	repos := repository.NewRepository(&cfg.Repo, log)
 	services := application.NewService(repos, log)
 	handlers := delivery.NewHandler(services, &cfg.Http, log)

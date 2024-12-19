@@ -16,6 +16,8 @@ const (
 	tokenTTL   = 12 * time.Hour
 )
 
+// TODO: прочитать про jwt токены
+// TODO: прочитать про snake_case, camel_case, как правильно называть переменные в Golang
 type tokenClaims struct {
 	jwt.StandardClaims
 	UserId int `json:"user_id"`

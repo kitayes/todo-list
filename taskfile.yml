@@ -1,0 +1,17 @@
+version: '3'
+
+tasks:
+  run:
+    desc: "Запуск приложения"
+    cmds:
+      - go run cmd/app/main.go
+
+  fmt:
+    desc: "Форматирование кода с помощью go fmt"
+    cmds:
+      - go fmt ./...
+
+  fields:
+    desc: "Оптимизирование памяти по структурам данных"
+    cmds:
+      - fieldalignment -fix ./...

@@ -1,6 +1,7 @@
-package service
+package application
 
 import (
+	"context"
 	"todo/internal/models"
 	"todo/internal/repository"
 )
@@ -41,4 +42,16 @@ func NewService(repos *repository.Repository) *Service {
 		TodoList:      NewTodoListService(repos.TodoList),
 		TodoItem:      NewTodoItemService(repos.TodoItem, repos.TodoList),
 	}
+}
+
+func (s *Service) Run(_ context.Context) error {
+	return nil
+}
+
+func (s *Service) Stop(_ context.Context) error {
+	return nil
+}
+
+func (s *Service) Init() error {
+	return nil
 }

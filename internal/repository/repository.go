@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"github.com/jmoiron/sqlx"
 	"todo/internal/models"
 )
@@ -27,15 +28,36 @@ type TodoItem interface {
 }
 
 type Repository struct {
+	cfg *Config
+	db  *sqlx.DB
 	Authorization
 	TodoList
 	TodoItem
 }
 
-func NewRepository(db *sqlx.DB) *Repository {
+func NewRepository(cfg *Config) *Repository {
 	return &Repository{
-		Authorization: NewAuthPostgres(db),
-		TodoList:      NewTodoListPostgres(db),
-		TodoItem:      NewTodoItemPostgres(db),
+		cfg: cfg,
 	}
+}
+
+func (r *Repository) Run(_ context.Context) error {
+	return nil
+}
+
+func (r *Repository) Stop(_ context.Context) error {
+	return r.db.Close()
+}
+
+func (r *Repository) Init() error {
+	var err error
+	r.db, err = newPostgresDB(r.cfg)
+	if err != nil {
+		return err
+	}
+	r.Authorization = NewAuthPostgres(r.db)
+	r.TodoList = NewTodoListPostgres(r.db)
+	r.TodoItem = NewTodoItemPostgres(r.db)
+
+	return nil
 }

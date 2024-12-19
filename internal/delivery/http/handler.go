@@ -6,38 +6,55 @@ import (
 	_ "github.com/swaggo/files"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"log"
 	"net/http"
 	"time"
 	_ "todo/docs"
-	"todo/internal/service"
+	"todo/internal/application"
 )
 
+type Config struct {
+	Port         string        `env:"PORT"`
+	ReadTimeOut  time.Duration `env:"READ_TIMEOUT"`
+	WriteTimeOut time.Duration `env:"WRITE_TIMEOUT"`
+}
+
 type Handler struct {
-	services   *service.Service
+	cfg        *Config
+	services   *application.Service
 	httpServer *http.Server
+	router     *gin.Engine
 }
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
-}
-
-func (h *Handler) RunServer(port string, handlers *gin.Engine) error {
-	h.httpServer = &http.Server{
-		Addr:           ":" + port,
-		Handler:        handlers,
-		MaxHeaderBytes: 1 << 20, // 1 MB
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+func NewHandler(services *application.Service, cfg *Config) *Handler {
+	return &Handler{
+		services: services,
+		cfg:      cfg,
 	}
-
-	return h.httpServer.ListenAndServe()
 }
 
-func (h *Handler) Shutdown(ctx context.Context) error {
+func (h *Handler) Run(_ context.Context) error {
+
+	h.httpServer = &http.Server{
+		Addr:         ":" + h.cfg.Port,
+		Handler:      h.router,
+		ReadTimeout:  h.cfg.ReadTimeOut,
+		WriteTimeout: h.cfg.WriteTimeOut,
+	}
+	go func() {
+		if err := h.httpServer.ListenAndServe(); err != nil {
+			log.Println("listen: %s\n", err.Error())
+			return
+		}
+	}()
+	return nil
+}
+
+func (h *Handler) Stop(ctx context.Context) error {
 	return h.httpServer.Shutdown(ctx)
 }
 
-func (h *Handler) InitRoutes() *gin.Engine {
+func (h *Handler) Init() error {
 	router := gin.New()
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -73,5 +90,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		}
 	}
 
-	return router
+	h.router = router
+	return nil
 }

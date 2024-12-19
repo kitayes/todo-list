@@ -2,18 +2,24 @@ package main
 
 import (
 	"context"
-	"os"
-	"os/signal"
-	"syscall"
-	delivery "todo/internal/delivery/http"
-
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+	"todo/internal/application"
+	delivery "todo/internal/delivery/http"
 	"todo/internal/repository"
-	"todo/internal/service"
+	"todo/pkg/config"
+	service "todo/pkg/services"
 )
+
+type Config struct {
+	Repo repository.Config `envPrefix:"REPO_"`
+	Http delivery.Config   `envPrefix:"HTTP_"`
+}
 
 // @title           TODO list
 // @version         1.0
@@ -28,41 +34,30 @@ import (
 // @name Authorization
 
 func main() {
-	logrus.SetFormatter(new(logrus.JSONFormatter))
-
-	if err := initConfig(); err != nil {
-		logrus.Errorf("error initializing configs: %s", err.Error())
-		return
-	}
-
 	if err := godotenv.Load(); err != nil {
 		logrus.Errorf("error loading env variables: %s", err.Error())
 		return
 	}
-
-	db, err := repository.NewPostgresDB(repository.Config{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetString("db.port"),
-		Username: viper.GetString("db.username"),
-		DBName:   viper.GetString("db.dbname"),
-		SSLMode:  viper.GetString("db.sslmode"),
-		Password: os.Getenv("DB_PASSWORD"),
-	})
-	if err != nil {
-		logrus.Errorf("failed to initialize db: %s", err.Error())
+	logrus.SetFormatter(new(logrus.JSONFormatter))
+	cfg := Config{}
+	if err := config.ReadEnvConfig(&cfg); err != nil {
+		logrus.Errorf("error initializing configs: %s", err.Error())
 		return
 	}
-	defer func() {
-		if err = db.Close(); err != nil {
-			logrus.Errorf("failed to close db: %s", err.Error())
-		}
-	}()
-	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
-	handlers := delivery.NewHandler(services)
 
+	repos := repository.NewRepository(&cfg.Repo)
+	services := application.NewService(repos)
+	handlers := delivery.NewHandler(services, &cfg.Http)
+
+	srv := service.NewServiceManager()
+	srv.AddService(
+		repos,
+		services,
+		handlers,
+	)
+	ctx := context.Background()
 	go func() {
-		if err := handlers.RunServer(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+		if err := srv.Run(ctx); err != nil {
 			logrus.Errorf("error occured while running http server: %s", err.Error())
 			return
 		}
@@ -76,15 +71,12 @@ func main() {
 
 	logrus.Print("TodoApp Shutting Down")
 
-	if err := handlers.Shutdown(context.Background()); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	if err := srv.Stop(ctx); err != nil {
 		logrus.Errorf("error occured on server shutting down: %s", err.Error())
 		return
 	}
 
-}
-
-func initConfig() error {
-	viper.AddConfigPath("config")
-	viper.SetConfigName("config")
-	return viper.ReadInConfig()
 }

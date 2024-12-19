@@ -15,15 +15,15 @@ const (
 )
 
 type Config struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	DBName   string
-	SSLMode  string
+	Host     string `env:"DB_HOST"`
+	Port     string `env:"DB_PORT"`
+	Username string `env:"DB_USERNAME"`
+	Password string `env:"DB_PASSWORD"`
+	DBName   string `env:"DB_NAME"`
+	SSLMode  string `env:"DB_SSLMODE"`
 }
 
-func NewPostgresDB(cfg Config) (*sqlx.DB, error) {
+func newPostgresDB(cfg *Config) (*sqlx.DB, error) {
 	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))
 	if err != nil {

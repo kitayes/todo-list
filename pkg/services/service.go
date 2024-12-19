@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+// TODO: разобраться с работой сервис менеджера
 type Service interface {
 	Init() error
 	Run(ctx context.Context) error

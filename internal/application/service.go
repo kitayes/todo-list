@@ -8,6 +8,13 @@ import (
 
 //go:generate mockgen -source=service.go -destination=mocks/mock.go
 
+type Logger interface {
+	Error(format string, v ...interface{})
+	Warn(format string, v ...interface{})
+	Info(format string, v ...interface{})
+	Debug(format string, v ...interface{})
+}
+
 type Authorization interface {
 	CreateUser(user models.User) (int, error)
 	GenerateToken(username, password string) (string, error)
@@ -34,13 +41,15 @@ type Service struct {
 	Authorization
 	TodoList
 	TodoItem
+	logger Logger
 }
 
-func NewService(repos *repository.Repository) *Service {
+func NewService(repos *repository.Repository, logger Logger) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
 		TodoList:      NewTodoListService(repos.TodoList),
 		TodoItem:      NewTodoItemService(repos.TodoItem, repos.TodoList),
+		logger:        logger,
 	}
 }
 

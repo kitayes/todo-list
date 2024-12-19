@@ -1,6 +1,7 @@
 package application
 
 import (
+	"github.com/pkg/errors"
 	"todo/internal/models"
 	"todo/internal/repository"
 )
@@ -14,14 +15,19 @@ func NewTodoItemService(repo repository.TodoItem, listRepo repository.TodoList) 
 	return &TodoItemService{repo: repo, listRepo: listRepo}
 }
 
+// TODO: прочитать про враппинг ошибок и заврапить все ошибки по примеру
 func (s *TodoItemService) Create(userId, listId int, item models.TodoItem) (int, error) {
 	_, err := s.listRepo.GetById(userId, listId)
 	if err != nil {
-		// list does not exists or does not belongs to user
-		return 0, err
+		return 0, errors.Wrap(err, "s.listRepo.GetById(...) err:")
+	}
+	var id int
+	id, err = s.repo.Create(listId, item)
+	if err != nil {
+		return 0, errors.Wrap(err, "s.repo.Create(...) err:")
 	}
 
-	return s.repo.Create(listId, item)
+	return id, nil
 }
 
 func (s *TodoItemService) GetAll(userId, listId int) ([]models.TodoItem, error) {

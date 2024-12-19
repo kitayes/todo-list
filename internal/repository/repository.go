@@ -6,6 +6,13 @@ import (
 	"todo/internal/models"
 )
 
+type Logger interface {
+	Error(format string, v ...interface{})
+	Warn(format string, v ...interface{})
+	Info(format string, v ...interface{})
+	Debug(format string, v ...interface{})
+}
+
 type Authorization interface {
 	CreateUser(user models.User) (int, error)
 	GetUser(username, password string) (models.User, error)
@@ -33,11 +40,13 @@ type Repository struct {
 	Authorization
 	TodoList
 	TodoItem
+	logger Logger
 }
 
-func NewRepository(cfg *Config) *Repository {
+func NewRepository(cfg *Config, logger Logger) *Repository {
 	return &Repository{
-		cfg: cfg,
+		cfg:    cfg,
+		logger: logger,
 	}
 }
 

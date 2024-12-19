@@ -13,6 +13,13 @@ import (
 	"todo/internal/application"
 )
 
+type Logger interface {
+	Error(format string, v ...interface{})
+	Warn(format string, v ...interface{})
+	Info(format string, v ...interface{})
+	Debug(format string, v ...interface{})
+}
+
 type Config struct {
 	Port         string        `env:"PORT"`
 	ReadTimeOut  time.Duration `env:"READ_TIMEOUT"`
@@ -24,12 +31,14 @@ type Handler struct {
 	services   *application.Service
 	httpServer *http.Server
 	router     *gin.Engine
+	logger     Logger
 }
 
-func NewHandler(services *application.Service, cfg *Config) *Handler {
+func NewHandler(services *application.Service, cfg *Config, logger Logger) *Handler {
 	return &Handler{
 		services: services,
 		cfg:      cfg,
+		logger:   logger,
 	}
 }
 

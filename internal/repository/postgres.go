@@ -23,6 +23,7 @@ type Config struct {
 	SSLMode  string `env:"DB_SSLMODE"`
 }
 
+// TODO: поменять библиотеку sqlx на библиотеку database/sql, поменять драйвер с pq на pgx, поменять голые запросы на Masterminds/squirrel
 func newPostgresDB(cfg *Config) (*sqlx.DB, error) {
 	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))

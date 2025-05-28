@@ -2,9 +2,9 @@ package application
 
 import (
 	"crypto/sha1"
-	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
 	"time"
 	"todo/internal/models"
 	"todo/internal/repository"
@@ -39,7 +39,7 @@ func (s *AuthService) CreateUser(user models.User) (int, error) {
 func (s *AuthService) GenerateToken(username, password string) (string, error) {
 	user, err := s.repo.GetUser(username, generatePasswordHash(password))
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "s.listRepo.GetUser(...) err:")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
@@ -62,7 +62,7 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 		return []byte(signingKey), nil
 	})
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "jwt.ParseWithClaims err:")
 	}
 
 	claims, ok := token.Claims.(*tokenClaims)

@@ -2,61 +2,72 @@ package service
 
 import (
 	"context"
-	"log"
+	"os"
+	"os/signal"
 )
 
-// TODO: разобраться с работой сервис менеджера
-type Service interface {
-	Init() error
-	Run(ctx context.Context) error
-	Stop(ctx context.Context) error
+type Logger interface {
+	Error(format string, v ...interface{})
+	Warn(format string, v ...interface{})
+	Info(format string, v ...interface{})
+	Debug(format string, v ...interface{})
 }
 
-type ServiceManager struct {
-	Services []Service
-}
-
-func NewServiceManager() *ServiceManager {
-	return &ServiceManager{}
-}
-
-func (sm *ServiceManager) AddService(services ...Service) {
-	for _, service := range services {
-		sm.Services = append(sm.Services, service)
+type (
+	Service interface {
+		Init() error
+		Run(ctx context.Context)
+		Stop()
 	}
+	Services interface {
+		AddService(service ...Service)
+		Run(ctx context.Context) error
+	}
+	Manager struct {
+		log      Logger
+		services []Service
+	}
+)
+
+func NewManager(log Logger) Services {
+	return &Manager{log: log}
 }
 
-func (sm *ServiceManager) Run(ctx context.Context) error {
+func (s *Manager) AddService(service ...Service) {
+	s.services = append(s.services, service...)
+}
+
+func (s *Manager) Run(ctx context.Context) error {
 	var err error
-	for _, service := range sm.Services {
+	s.log.Info("going to start services")
+	for count, service := range s.services {
 		err = service.Init()
 		if err != nil {
-			err = sm.Stop(ctx)
-			if err != nil {
-				log.Println(err.Error())
+			for i := 0; i < count; i++ {
+				service.Stop()
 			}
+
 			return err
 		}
-		go func() {
-			err = service.Run(ctx)
-			if err != nil {
-				err = sm.Stop(ctx)
-				if err != nil {
-					log.Println(err.Error())
-				}
-			}
-		}()
+		go service.Run(ctx)
 	}
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	select {
+	case <-c:
+		s.stop()
+	case <-ctx.Done():
+		s.stop()
+	}
+
 	return nil
 }
 
-func (sm *ServiceManager) Stop(ctx context.Context) error {
-	var err error
-	for _, service := range sm.Services {
-		err = service.Stop(ctx)
-		if err != nil {
-			return err
-		}
+func (s *Manager) stop() {
+	s.log.Info("going to stop")
+	for _, service := range s.services {
+		service.Stop()
 	}
-	return nil
 }

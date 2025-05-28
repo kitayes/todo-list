@@ -1,10 +1,10 @@
 package delivery
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
-	"net/http"
+	"github.com/pkg/errors"
 	"strings"
+	"todo/internal/models"
 )
 
 const (
@@ -15,24 +15,24 @@ const (
 func (h *Handler) userIdentity(c *gin.Context) {
 	header := c.GetHeader(authorizationHeader)
 	if header == "" {
-		newErrorResponse(c, http.StatusUnauthorized, "empty auth header")
+		h.newErrorResponse(c, models.ErrUnauthorized)
 		return
 	}
 
 	headerParts := strings.Split(header, " ")
 	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-		newErrorResponse(c, http.StatusUnauthorized, "invalid auth header")
+		h.newErrorResponse(c, models.ErrUnauthorized)
 		return
 	}
 
 	if len(headerParts[1]) == 0 {
-		newErrorResponse(c, http.StatusUnauthorized, "token is empty")
+		h.newErrorResponse(c, models.ErrUnauthorized)
 		return
 	}
 
 	userId, err := h.services.Authorization.ParseToken(headerParts[1])
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		h.newErrorResponse(c, err)
 		return
 	}
 
@@ -47,8 +47,10 @@ func getUserId(c *gin.Context) (int, error) {
 
 	idInt, ok := id.(int)
 	if !ok {
-		return 0, errors.New("user id is of invalid type")
+		return 0, errors.Wrap(models.ErrInvalidInput, "user id is of invalid type")
 	}
 
 	return idInt, nil
 }
+
+// osh valid invalidinp, jwt unauth, notfound sql

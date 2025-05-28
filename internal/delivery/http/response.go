@@ -2,7 +2,9 @@ package delivery
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
+	"net/http"
+	"todo/internal/models"
 )
 
 type errorResponse struct {
@@ -13,7 +15,16 @@ type statusResponse struct {
 	Status string `json:"status"`
 }
 
-func newErrorResponse(c *gin.Context, statusCode int, message string) {
-	logrus.Error(message)
-	c.AbortWithStatusJSON(statusCode, errorResponse{message})
+func (h *Handler) newErrorResponse(c *gin.Context, err error) {
+	switch {
+	case errors.Is(err, models.ErrInvalidInput):
+		c.AbortWithStatus(http.StatusBadRequest)
+	case errors.Is(err, models.ErrNotFound):
+		c.AbortWithStatus(http.StatusNotFound)
+	case errors.Is(err, models.ErrUnauthorized):
+		c.AbortWithStatus(http.StatusUnauthorized)
+	default:
+		h.logger.Error(err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+	}
 }

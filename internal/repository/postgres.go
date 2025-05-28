@@ -2,8 +2,9 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
-	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 const (
@@ -24,8 +25,8 @@ type Config struct {
 }
 
 // TODO: поменять библиотеку sqlx на библиотеку database/sql, поменять драйвер с pq на pgx, поменять голые запросы на Masterminds/squirrel
-func newPostgresDB(cfg *Config) (*sqlx.DB, error) {
-	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
+func newPostgresDB(cfg *Config) (*sql.DB, error) {
+	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))
 	if err != nil {
 		return nil, err

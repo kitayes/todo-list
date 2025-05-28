@@ -42,7 +42,7 @@ func NewHandler(services *application.Service, cfg *Config, logger Logger) *Hand
 	}
 }
 
-func (h *Handler) Run(_ context.Context) error {
+func (h *Handler) Run(_ context.Context) {
 
 	h.httpServer = &http.Server{
 		Addr:         ":" + h.cfg.Port,
@@ -56,11 +56,13 @@ func (h *Handler) Run(_ context.Context) error {
 			return
 		}
 	}()
-	return nil
 }
 
-func (h *Handler) Stop(ctx context.Context) error {
-	return h.httpServer.Shutdown(ctx)
+func (h *Handler) Stop() {
+	err := h.httpServer.Shutdown(context.Background())
+	if err != nil {
+		h.logger.Error(err.Error())
+	}
 }
 
 func (h *Handler) Init() error {

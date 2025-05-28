@@ -53,12 +53,10 @@ func NewService(repos *repository.Repository, logger Logger) *Service {
 	}
 }
 
-func (s *Service) Run(_ context.Context) error {
-	return nil
+func (s *Service) Run(_ context.Context) {
 }
 
-func (s *Service) Stop(_ context.Context) error {
-	return nil
+func (s *Service) Stop() {
 }
 
 func (s *Service) Init() error {

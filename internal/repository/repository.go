@@ -2,7 +2,8 @@ package repository
 
 import (
 	"context"
-	"github.com/jmoiron/sqlx"
+	"database/sql"
+	_ "github.com/lib/pq"
 	"todo/internal/models"
 )
 
@@ -36,7 +37,7 @@ type TodoItem interface {
 
 type Repository struct {
 	cfg *Config
-	db  *sqlx.DB
+	db  *sql.DB
 	Authorization
 	TodoList
 	TodoItem
@@ -50,12 +51,14 @@ func NewRepository(cfg *Config, logger Logger) *Repository {
 	}
 }
 
-func (r *Repository) Run(_ context.Context) error {
-	return nil
+func (r *Repository) Run(_ context.Context) {
 }
 
-func (r *Repository) Stop(_ context.Context) error {
-	return r.db.Close()
+func (r *Repository) Stop() {
+	err := r.db.Close()
+	if err != nil {
+		r.logger.Error(err.Error())
+	}
 }
 
 func (r *Repository) Init() error {

@@ -1,19 +1,22 @@
 package repository
 
 import (
+	"database/sql"
 	"fmt"
-	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"strings"
 	"todo/internal/models"
 )
 
 type TodoItemPostgres struct {
-	db *sqlx.DB
+	db *sql.DB
 }
 
-func NewTodoItemPostgres(db *sqlx.DB) *TodoItemPostgres {
+func NewTodoItemPostgres(db *sql.DB) *TodoItemPostgres {
 	return &TodoItemPostgres{db: db}
 }
+
+// я забыл откуда берется ti
 
 func (r *TodoItemPostgres) Create(listId int, item models.TodoItem) (int, error) {
 	tx, err := r.db.Begin()
@@ -42,11 +45,28 @@ func (r *TodoItemPostgres) Create(listId int, item models.TodoItem) (int, error)
 }
 
 func (r *TodoItemPostgres) GetAll(userId, listId int) ([]models.TodoItem, error) {
-	var items []models.TodoItem
-	query := fmt.Sprintf(`SELECT ti.id, ti.title, ti.description, ti.done FROM %s ti INNER JOIN %s li on li.item_id = ti.id
-									INNER JOIN %s ul on ul.list_id = li.list_id WHERE li.list_id = $1 AND ul.user_id = $2`,
+	query := fmt.Sprintf(`SELECT ti.id, ti.title, ti.description, ti.done FROM %s ti 
+                          INNER JOIN %s li ON li.item_id = ti.id
+                          INNER JOIN %s ul ON ul.list_id = li.list_id 
+                          WHERE li.list_id = $1 AND ul.user_id = $2`,
 		todoItemsTable, listsItemsTable, usersListsTable)
-	if err := r.db.Select(&items, query, listId, userId); err != nil {
+
+	rows, err := r.db.Query(query, listId, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []models.TodoItem
+	for rows.Next() {
+		var item models.TodoItem
+		if err := rows.Scan(&item.Id, &item.Title, &item.Description, &item.Done); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
+	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 
@@ -55,10 +75,23 @@ func (r *TodoItemPostgres) GetAll(userId, listId int) ([]models.TodoItem, error)
 
 func (r *TodoItemPostgres) GetById(userId, itemId int) (models.TodoItem, error) {
 	var item models.TodoItem
-	query := fmt.Sprintf(`SELECT ti.id, ti.title, ti.description, ti.done FROM %s ti INNER JOIN %s li on li.item_id = ti.id
-									INNER JOIN %s ul on ul.list_id = li.list_id WHERE ti.id = $1 AND ul.user_id = $2`,
+
+	query := fmt.Sprintf(`
+		SELECT ti.id, ti.title, ti.description, ti.done 
+		FROM %s ti 
+		INNER JOIN %s li ON li.item_id = ti.id
+		INNER JOIN %s ul ON ul.list_id = li.list_id 
+		WHERE ti.id = $1 AND ul.user_id = $2`,
 		todoItemsTable, listsItemsTable, usersListsTable)
-	if err := r.db.Get(&item, query, itemId, userId); err != nil {
+
+	row := r.db.QueryRow(query, itemId, userId)
+
+	err := row.Scan(&item.Id, &item.Title, &item.Description, &item.Done)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// Если запись не найдена, можно вернуть кастомную ошибку
+			return item, fmt.Errorf("item not found")
+		}
 		return item, err
 	}
 
@@ -66,11 +99,20 @@ func (r *TodoItemPostgres) GetById(userId, itemId int) (models.TodoItem, error) 
 }
 
 func (r *TodoItemPostgres) Delete(userId, itemId int) error {
-	query := fmt.Sprintf(`DELETE FROM %s ti USING %s li, %s ul 
-									WHERE ti.id = li.item_id AND li.list_id = ul.list_id AND ul.user_id = $1 AND ti.id = $2`,
-		todoItemsTable, listsItemsTable, usersListsTable)
+	query := `
+		DELETE FROM todo_items ti 
+		USING list_items li, user_lists ul 
+		WHERE ti.id = li.item_id 
+		  AND li.list_id = ul.list_id 
+		  AND ul.user_id = $1 
+		  AND ti.id = $2`
+
 	_, err := r.db.Exec(query, userId, itemId)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to delete todo item: %w", err)
+	}
+
+	return nil
 }
 
 func (r *TodoItemPostgres) Update(userId, itemId int, input models.UpdateItemInput) error {

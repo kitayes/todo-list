@@ -1,16 +1,18 @@
 package repository
 
 import (
+	"database/sql"
+	_ "database/sql"
 	"fmt"
-	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"todo/internal/models"
 )
 
 type AuthPostgres struct {
-	db *sqlx.DB
+	db *sql.DB
 }
 
-func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
+func NewAuthPostgres(db *sql.DB) *AuthPostgres {
 	return &AuthPostgres{db: db}
 }
 
@@ -28,8 +30,18 @@ func (r *AuthPostgres) CreateUser(user models.User) (int, error) {
 
 func (r *AuthPostgres) GetUser(username, password string) (models.User, error) {
 	var user models.User
-	query := fmt.Sprintf("SELECT id FROM %s WHERE username=$1 AND password_hash=$2", usersTable)
-	err := r.db.Get(&user, query, username, password)
+
+	query := fmt.Sprintf("SELECT id, password_hash FROM %s WHERE username=$1", usersTable)
+
+	err := r.db.QueryRow(query, username).Scan(&user.Id, &user.Password) // трабла с PasswordHash
 
 	return user, err
 }
+
+// func (r *AuthPostgres) GetUser(username, password string) (models.User, error) {
+//	var user models.User
+//	query := fmt.Sprintf("SELECT id FROM %s WHERE username=$1 AND password_hash=$2", usersTable)
+//	err := r.db.Get(&user, query, username, password)
+//
+//	return user, err
+//}

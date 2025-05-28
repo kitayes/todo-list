@@ -2,13 +2,10 @@ package main
 
 import (
 	"context"
+	_ "github.com/jackc/pgx"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
+	"github.com/pkg/errors"
 	"log/slog"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 	"todo/internal/application"
 	delivery "todo/internal/delivery/http"
 	"todo/internal/repository"
@@ -17,6 +14,8 @@ import (
 	service "todo/pkg/services"
 )
 
+// TODO: прочитать про unit-test'ы, mock'и, покрыть все тестами
+// TODO: прочитать про линтер и добавить линтер в проект
 // TODO: дописать сваггер на все эндпоинты
 // TODO: почитать про миграции, добавить в pkg реализацию обновления миграций
 type Config struct {
@@ -56,7 +55,7 @@ func main() {
 	services := application.NewService(repos, log)
 	handlers := delivery.NewHandler(services, &cfg.Http, log)
 
-	srv := service.NewServiceManager()
+	srv := service.NewManager(log)
 	srv.AddService(
 		repos,
 		services,
@@ -64,27 +63,11 @@ func main() {
 	)
 	// TODO: прочитать про контекст, где используют, виды контекста
 	ctx := context.Background()
-	go func() {
-		if err := srv.Run(ctx); err != nil {
-			log.Error("error occured while running http server: %s", err.Error())
-			return
-		}
-	}()
-
-	log.Info("TodoApp Started")
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
-	<-quit
-
-	log.Info("TodoApp Shutting Down")
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-
-	if err := srv.Stop(ctx); err != nil {
-		log.Error("error occured on server shutting down: %s", err.Error())
+	if err := srv.Run(ctx); err != nil {
+		err := errors.Wrap(err, "s.listRepo.GetById(...) err:")
+		log.Error(err.Error())
 		return
 	}
 
+	log.Info("TodoApp Started")
 }

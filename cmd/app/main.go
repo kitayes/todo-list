@@ -64,7 +64,7 @@ func main() {
 	// TODO: прочитать про контекст, где используют, виды контекста
 	ctx := context.Background()
 	if err := srv.Run(ctx); err != nil {
-		err := errors.Wrap(err, "s.listRepo.GetById(...) err:")
+		err := errors.Wrap(err, "srv.Run(...) err:")
 		log.Error(err.Error())
 		return
 	}

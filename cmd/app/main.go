@@ -2,9 +2,6 @@ package main
 
 import (
 	"context"
-	_ "github.com/jackc/pgx"
-	"github.com/joho/godotenv"
-	"github.com/pkg/errors"
 	"log/slog"
 	"todo/internal/application"
 	delivery "todo/internal/delivery/http"
@@ -12,6 +9,10 @@ import (
 	"todo/pkg/config"
 	"todo/pkg/logger"
 	service "todo/pkg/services"
+
+	_ "github.com/jackc/pgx"
+	"github.com/joho/godotenv"
+	"github.com/pkg/errors"
 )
 
 // TODO: прочитать про unit-test'ы, mock'и, покрыть все тестами
@@ -29,7 +30,7 @@ type Config struct {
 // @description     Пет проект, заметки.
 // @termsOfService  http://swagger.io/terms/
 
-// @host localhost:8000
+// @host localhost:8082
 // @BasePath /
 
 // @securityDefinitions.apikey ApiKeyAuth
@@ -58,7 +59,6 @@ func main() {
 	srv := service.NewManager(log)
 	srv.AddService(
 		repos,
-		services,
 		handlers,
 	)
 	// TODO: прочитать про контекст, где используют, виды контекста

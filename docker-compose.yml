@@ -1,20 +1,20 @@
-version: '3.8'
-
 services:
   test_task-app:
     build: ./
-    container_name: test_task-app
-    command: ./wait-for-postgres.sh db ./test_task-app
+    container_name: todo-app
+    command: ./wait-for-postgres.sh db ./todo-app
     ports:
       - "8082:8082"
     depends_on:
       - db
     environment:
       - REPO_PASSWORD=qwerty
+    env_file:
+          - .env
 
   db:
-    image: postgres:15
-    container_name: test_task-db
+    image: postgres:17
+    container_name: todo-db
     restart: always
     volumes:
       - ./.database/postgres/data:/var/lib/postgresql/data

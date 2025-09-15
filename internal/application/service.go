@@ -1,7 +1,6 @@
 package application
 
 import (
-	"context"
 	"todo/internal/models"
 	"todo/internal/repository"
 )
@@ -51,14 +50,4 @@ func NewService(repos *repository.Repository, logger Logger) *Service {
 		TodoItem:      NewTodoItemService(repos.TodoItem, repos.TodoList),
 		logger:        logger,
 	}
-}
-
-func (s *Service) Run(_ context.Context) {
-}
-
-func (s *Service) Stop() {
-}
-
-func (s *Service) Init() error {
-	return nil
 }

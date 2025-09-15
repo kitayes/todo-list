@@ -1,22 +1,26 @@
 version: '3.8'
 
 services:
-  todo-app:
+  test_task-app:
     build: ./
-    command: ./wait-for-postgres.sh db ./todo-app
+    container_name: test_task-app
+    command: ./wait-for-postgres.sh db ./test_task-app
     ports:
-      - 8000:8000
+      - "8082:8082"
     depends_on:
       - db
     environment:
-      - DB_PASSWORD=qwerty
+      - REPO_PASSWORD=qwerty
 
   db:
+    image: postgres:15
+    container_name: test_task-db
     restart: always
-    image: postgres:latest
     volumes:
       - ./.database/postgres/data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=qwerty
+      - POSTGRES_DB=subscriptions
+      - POSTGRES_USER=postgres
     ports:
-      - 5432:5432
+      - "5435:5432"

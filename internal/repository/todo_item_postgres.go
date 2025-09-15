@@ -16,8 +16,6 @@ func NewTodoItemPostgres(db *sql.DB) *TodoItemPostgres {
 	return &TodoItemPostgres{db: db}
 }
 
-// я забыл откуда берется ti
-
 func (r *TodoItemPostgres) Create(listId int, item models.TodoItem) (int, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
